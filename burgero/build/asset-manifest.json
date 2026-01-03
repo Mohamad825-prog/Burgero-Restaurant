@@ -1,28 +1,28 @@
 {
   "files": {
-    "main.css": "/burgero_project/static/css/main.1b1abe25.css",
-    "main.js": "/burgero_project/static/js/main.1df8aae7.js",
-    "static/media/Hero.jpg": "/burgero_project/static/media/Hero.72cc9044c1d90e9c04fe.jpg",
-    "static/media/Burgerita.jpg": "/burgero_project/static/media/Burgerita.5b16ad1f44b022f36d0a.jpg",
-    "static/media/ClassicBurger.jpg": "/burgero_project/static/media/ClassicBurger.c19934d5c882da616d1b.jpg",
-    "static/media/TheLebanese.jpg": "/burgero_project/static/media/TheLebanese.52d1b5fef4fab435e494.jpg",
-    "static/media/PepperMaize.jpg": "/burgero_project/static/media/PepperMaize.0e843e23f827a2520831.jpg",
-    "static/media/TruffleBurger.jpg": "/burgero_project/static/media/TruffleBurger.9112418980677db25d9d.jpg",
-    "static/media/EggliniBurger.jpg": "/burgero_project/static/media/EggliniBurger.3de59d460a71673e88d2.jpg",
-    "static/media/TheMozz.jpg": "/burgero_project/static/media/TheMozz.36a07ada185da75096ba.jpg",
-    "static/media/TheBurgero.jpg": "/burgero_project/static/media/TheBurgero.27f74b991ac22d2f761a.jpg",
-    "static/media/TheSmashBurger.jpg": "/burgero_project/static/media/TheSmashBurger.26cbdfa5c74c576850c3.jpg",
-    "static/media/MushroomVibes.jpg": "/burgero_project/static/media/MushroomVibes.38d508b1ea3b8a9446a0.jpg",
-    "static/media/slick.svg": "/burgero_project/static/media/slick.2630a3e3eab21c607e21.svg",
-    "static/media/slick.eot": "/burgero_project/static/media/slick.a4e97f5a2a64f0ab1323.eot",
-    "static/media/slick.ttf": "/burgero_project/static/media/slick.c94f7671dcc99dce43e2.ttf",
-    "static/media/slick.woff": "/burgero_project/static/media/slick.295183786cd8a1389865.woff",
-    "index.html": "/burgero_project/index.html",
-    "main.1b1abe25.css.map": "/burgero_project/static/css/main.1b1abe25.css.map",
-    "main.1df8aae7.js.map": "/burgero_project/static/js/main.1df8aae7.js.map"
+    "main.css": "./static/css/main.8eb0ce26.css",
+    "main.js": "./static/js/main.e65d37e8.js",
+    "static/media/Hero.jpg": "./static/media/Hero.72cc9044c1d90e9c04fe.jpg",
+    "static/media/Burgerita.jpg": "./static/media/Burgerita.5b16ad1f44b022f36d0a.jpg",
+    "static/media/ClassicBurger.jpg": "./static/media/ClassicBurger.c19934d5c882da616d1b.jpg",
+    "static/media/TheLebanese.jpg": "./static/media/TheLebanese.52d1b5fef4fab435e494.jpg",
+    "static/media/PepperMaize.jpg": "./static/media/PepperMaize.0e843e23f827a2520831.jpg",
+    "static/media/TruffleBurger.jpg": "./static/media/TruffleBurger.9112418980677db25d9d.jpg",
+    "static/media/EggliniBurger.jpg": "./static/media/EggliniBurger.3de59d460a71673e88d2.jpg",
+    "static/media/TheMozz.jpg": "./static/media/TheMozz.36a07ada185da75096ba.jpg",
+    "static/media/TheBurgero.jpg": "./static/media/TheBurgero.27f74b991ac22d2f761a.jpg",
+    "static/media/TheSmashBurger.jpg": "./static/media/TheSmashBurger.26cbdfa5c74c576850c3.jpg",
+    "static/media/MushroomVibes.jpg": "./static/media/MushroomVibes.38d508b1ea3b8a9446a0.jpg",
+    "static/media/slick.svg": "./static/media/slick.2630a3e3eab21c607e21.svg",
+    "static/media/slick.eot": "./static/media/slick.a4e97f5a2a64f0ab1323.eot",
+    "static/media/slick.ttf": "./static/media/slick.c94f7671dcc99dce43e2.ttf",
+    "static/media/slick.woff": "./static/media/slick.295183786cd8a1389865.woff",
+    "index.html": "./index.html",
+    "main.8eb0ce26.css.map": "./static/css/main.8eb0ce26.css.map",
+    "main.e65d37e8.js.map": "./static/js/main.e65d37e8.js.map"
   },
   "entrypoints": [
-    "static/css/main.1b1abe25.css",
-    "static/js/main.1df8aae7.js"
+    "static/css/main.8eb0ce26.css",
+    "static/js/main.e65d37e8.js"
   ]
 }

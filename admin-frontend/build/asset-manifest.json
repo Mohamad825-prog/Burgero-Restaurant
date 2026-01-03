@@ -1,19 +1,19 @@
 {
   "files": {
-    "main.css": "/admin-frontend/static/css/main.c6236f8c.css",
-    "main.js": "/admin-frontend/static/js/main.c0088be3.js",
-    "static/media/Hero.jpg": "/admin-frontend/static/media/Hero.72cc9044c1d90e9c04fe.jpg",
-    "static/media/EggliniBurger.jpg": "/admin-frontend/static/media/EggliniBurger.3de59d460a71673e88d2.jpg",
-    "static/media/slick.svg": "/admin-frontend/static/media/slick.2630a3e3eab21c607e21.svg",
-    "static/media/slick.eot": "/admin-frontend/static/media/slick.a4e97f5a2a64f0ab1323.eot",
-    "static/media/slick.ttf": "/admin-frontend/static/media/slick.c94f7671dcc99dce43e2.ttf",
-    "static/media/slick.woff": "/admin-frontend/static/media/slick.295183786cd8a1389865.woff",
-    "index.html": "/admin-frontend/index.html",
-    "main.c6236f8c.css.map": "/admin-frontend/static/css/main.c6236f8c.css.map",
-    "main.c0088be3.js.map": "/admin-frontend/static/js/main.c0088be3.js.map"
+    "main.css": "./static/css/main.d3cd6f47.css",
+    "main.js": "./static/js/main.f11756fe.js",
+    "static/media/Hero.jpg": "./static/media/Hero.72cc9044c1d90e9c04fe.jpg",
+    "static/media/EggliniBurger.jpg": "./static/media/EggliniBurger.3de59d460a71673e88d2.jpg",
+    "static/media/slick.svg": "./static/media/slick.2630a3e3eab21c607e21.svg",
+    "static/media/slick.eot": "./static/media/slick.a4e97f5a2a64f0ab1323.eot",
+    "static/media/slick.ttf": "./static/media/slick.c94f7671dcc99dce43e2.ttf",
+    "static/media/slick.woff": "./static/media/slick.295183786cd8a1389865.woff",
+    "index.html": "./index.html",
+    "main.d3cd6f47.css.map": "./static/css/main.d3cd6f47.css.map",
+    "main.f11756fe.js.map": "./static/js/main.f11756fe.js.map"
   },
   "entrypoints": [
-    "static/css/main.c6236f8c.css",
-    "static/js/main.c0088be3.js"
+    "static/css/main.d3cd6f47.css",
+    "static/js/main.f11756fe.js"
   ]
 }
