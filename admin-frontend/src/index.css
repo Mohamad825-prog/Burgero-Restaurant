@@ -1,0 +1,42 @@
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Miniver&family=Outfit:wght@100..900&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+
+/* Tailwind directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles */
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f5ede3;
+}
+
+/* Admin specific styles */
+.admin-table {
+  @apply w-full bg-white rounded-lg shadow-md overflow-hidden;
+}
+
+.admin-table th {
+  @apply bg-secondary text-white p-4 text-left font-semibold;
+}
+
+.admin-table td {
+  @apply p-4 border-b border-gray-200;
+}
+
+.admin-btn {
+  @apply px-4 py-2 rounded-md font-semibold transition duration-300 hover:scale-105;
+}
+
+.admin-btn-primary {
+  @apply bg-primary text-white hover:bg-orange-600;
+}
+
+.admin-btn-secondary {
+  @apply bg-secondary text-white hover:bg-red-700;
+}
+
+.admin-card {
+  @apply bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition-all duration-300;
+}
