@@ -19,12 +19,10 @@ const App = () => {
   const closeOrderModal = () => setIsOrderOpen(false);
 
   return (
-    <Router>
+    <Router> {/* NO basename here! */}
       <div>
-        {/* Navbar */}
         <Navbar openOrderModal={openOrderModal} />
 
-        {/* Pages */}
         <Routes>
           <Route path="/" element={<HomePage openOrderModal={openOrderModal} />} />
           <Route path="/menu" element={<MenuPage />} />
@@ -34,13 +32,11 @@ const App = () => {
           <Route path="/contact" element={<ContactPage />} />
         </Routes>
 
-        {/* Modal */}
         <OrderModal isOpen={isOrderOpen} onClose={closeOrderModal} />
-
-        {/* Footer */}
         <Footer />
       </div>
     </Router>
   );
 };
+
 export default App;

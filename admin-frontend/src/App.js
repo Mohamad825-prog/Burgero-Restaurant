@@ -1,4 +1,3 @@
-// admin-frontend/src/App.js
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, BrowserRouter as Router } from "react-router-dom";
 import adminApiService from './services/adminApiService';
@@ -99,7 +98,7 @@ const App = () => {
 
   // Authenticated - show admin dashboard
   return (
-    <Router>
+    <Router> {/* NO basename here! */}
       <div className="bg-tertiary min-h-screen">
         <Navbar onLogout={handleLogout} />
 
