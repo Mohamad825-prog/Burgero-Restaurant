@@ -7,7 +7,7 @@ import App from './App';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <BrowserRouter basename="/burgero_project">
+    <BrowserRouter> {/* REMOVED basename="/burgero_project" */}
       <App />
     </BrowserRouter>
   </React.StrictMode>
