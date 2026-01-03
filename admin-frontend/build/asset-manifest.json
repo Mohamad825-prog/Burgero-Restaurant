@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "./static/css/main.d3cd6f47.css",
-    "main.js": "./static/js/main.f11756fe.js",
+    "main.js": "./static/js/main.eb4d97fb.js",
     "static/media/Hero.jpg": "./static/media/Hero.72cc9044c1d90e9c04fe.jpg",
     "static/media/EggliniBurger.jpg": "./static/media/EggliniBurger.3de59d460a71673e88d2.jpg",
     "static/media/slick.svg": "./static/media/slick.2630a3e3eab21c607e21.svg",
@@ -10,10 +10,10 @@
     "static/media/slick.woff": "./static/media/slick.295183786cd8a1389865.woff",
     "index.html": "./index.html",
     "main.d3cd6f47.css.map": "./static/css/main.d3cd6f47.css.map",
-    "main.f11756fe.js.map": "./static/js/main.f11756fe.js.map"
+    "main.eb4d97fb.js.map": "./static/js/main.eb4d97fb.js.map"
   },
   "entrypoints": [
     "static/css/main.d3cd6f47.css",
-    "static/js/main.f11756fe.js"
+    "static/js/main.eb4d97fb.js"
   ]
 }
