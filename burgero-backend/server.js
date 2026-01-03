@@ -1,222 +1,425 @@
+// burgero-backend/server.js
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
-const multer = require('multer');
+const { supabase, testConnection } = require('./config/supabase');
 require('dotenv').config();
 
 const app = express();
 
-// ========== FIXED CORS CONFIGURATION ==========
-// Allow all origins for development
+// ========== CORS CONFIGURATION ==========
+const allowedOrigins = [
+    'http://localhost:3000',  // User frontend (dev)
+    'http://localhost:3001',  // Admin frontend (dev)
+    'https://mohamad825-prog.github.io',  // Your GitHub Pages
+    'https://*.netlify.app',  // Netlify deployments
+];
+
 const corsOptions = {
-    origin: '*', // Allow all origins for now
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowedHeaders: [
-        'Content-Type',
-        'Authorization',
-        'X-Requested-With',
-        'Accept',
-        'Origin',
-        'Access-Control-Request-Method',
-        'Access-Control-Request-Headers',
-        'X-Access-Token'
-    ],
-    exposedHeaders: [
-        'Content-Range',
-        'X-Content-Range',
-        'Access-Control-Expose-Headers'
-    ],
-    maxAge: 86400,
-    preflightContinue: false,
-    optionsSuccessStatus: 204
-};
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
 
-// Apply CORS middleware BEFORE other middleware
-app.use(cors(corsOptions));
-
-// Handle preflight requests
-app.options('*', cors(corsOptions));
-
-// ========== MULTER CONFIGURATION ==========
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const uploadDir = 'public/uploads/';
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
+        if (allowedOrigins.indexOf(origin) !== -1 || origin.includes('netlify.app')) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
         }
-        cb(null, uploadDir);
     },
-    filename: function (req, file, cb) {
-        const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname);
-        cb(null, uniqueName);
-    }
-});
-
-const fileFilter = (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif|webp/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
-
-    if (mimetype && extname) {
-        return cb(null, true);
-    } else {
-        cb(new Error('Only image files are allowed (jpeg, jpg, png, gif, webp)'));
-    }
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
 };
 
-const upload = multer({
-    storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 },
-    fileFilter: fileFilter
-});
-
-// Make upload middleware available to routes
-app.locals.upload = upload;
-
-// ========== MIDDLEWARE ==========
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files
-app.use('/images', express.static(path.join(__dirname, 'public/images')));
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(__dirname, 'public/uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
-// ========== ROUTES ==========
-const orderRoutes = require('./routes/orders');
-const messageRoutes = require('./routes/messages');
-const menuRoutes = require('./routes/menu');
-const authRoutes = require('./routes/auth');
+// Serve static files (for image uploads)
+app.use('/uploads', express.static(uploadsDir));
 
-app.use('/api/orders', orderRoutes);
-app.use('/api/messages', messageRoutes);
-app.use('/api/menu', menuRoutes);
-app.use('/api/auth', authRoutes);
-
-// ========== FILE UPLOAD ROUTE ==========
-app.post('/api/upload', upload.single('image'), (req, res) => {
+// ========== HEALTH CHECK ENDPOINT ==========
+app.get('/api/health', async (req, res) => {
     try {
-        if (!req.file) {
+        // Test Supabase connection
+        const { data, error } = await supabase
+            .from('menu_items')
+            .select('count')
+            .limit(1);
+
+        if (error) throw error;
+
+        res.json({
+            success: true,
+            status: 'healthy',
+            service: 'Burgero Restaurant API',
+            version: '2.0',
+            database: 'Supabase',
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            status: 'unhealthy',
+            error: error.message
+        });
+    }
+});
+
+// ========== AUTH ENDPOINTS ==========
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+
+        console.log('Login attempt for:', username);
+
+        if (!username || !password) {
             return res.status(400).json({
                 success: false,
-                message: 'No file uploaded'
+                message: 'Username and password are required'
             });
         }
 
-        const imageUrl = `/uploads/${req.file.filename}`;
+        // Check admin credentials in Supabase
+        const { data: admin, error } = await supabase
+            .from('admin_users')
+            .select('*')
+            .eq('username', username)
+            .single();
 
-        res.json({
-            success: true,
-            message: 'File uploaded successfully',
-            data: {
-                filename: req.file.filename,
-                originalname: req.file.originalname,
-                path: imageUrl,
-                size: req.file.size,
-                mimetype: req.file.mimetype
-            }
-        });
+        if (error || !admin) {
+            console.log('Admin not found or error:', error?.message);
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid credentials'
+            });
+        }
+
+        // For now, we'll use simple password check
+        // In production, you should use bcrypt to compare hashed passwords
+        if (password === 'admin123') {  // Your default password
+            // Generate a simple token (replace with JWT in production)
+            const token = `burgero-admin-${Date.now()}-${admin.id}`;
+
+            res.json({
+                success: true,
+                message: 'Login successful',
+                token: token,
+                user: {
+                    id: admin.id,
+                    username: admin.username
+                }
+            });
+        } else {
+            res.status(401).json({
+                success: false,
+                message: 'Invalid credentials'
+            });
+        }
     } catch (error) {
-        console.error('Upload error:', error);
+        console.error('Login error:', error);
         res.status(500).json({
             success: false,
-            message: 'File upload failed'
+            message: 'Server error'
         });
     }
 });
 
-// ========== TEST ENDPOINTS ==========
-app.get('/api/health', (req, res) => {
-    res.json({
-        status: 'healthy',
-        timestamp: new Date().toISOString(),
-        service: 'Burgero API',
-        version: '2.0',
-        cors: 'enabled'
-    });
-});
+// ========== MENU ENDPOINTS ==========
+app.get('/api/menu/items', async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from('menu_items')
+            .select('*')
+            .order('is_default', { ascending: false })
+            .order('created_at', { ascending: false });
 
-app.get('/api/test', (req, res) => {
-    res.json({
-        success: true,
-        message: 'API is working!',
-        timestamp: new Date().toISOString(),
-        cors: 'enabled',
-        headers: req.headers
-    });
-});
+        if (error) throw error;
 
-// Simple test login endpoint (no auth required for testing)
-app.post('/api/test-login', (req, res) => {
-    const { username, password } = req.body;
-
-    if (username === 'admin' && password === 'admin123') {
         res.json({
             success: true,
-            message: 'Login successful (test mode)',
-            token: 'test-jwt-token-' + Date.now(),
-            user: { id: 1, username: 'admin' }
+            data: data
         });
+    } catch (error) {
+        console.error('Error fetching menu items:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch menu items'
+        });
+    }
+});
+
+app.get('/api/menu/special', async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from('special_items')
+            .select('*')
+            .order('is_default', { ascending: false })
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        res.json({
+            success: true,
+            data: data
+        });
+    } catch (error) {
+        console.error('Error fetching special items:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch special items'
+        });
+    }
+});
+
+// ========== ORDER ENDPOINTS ==========
+app.post('/api/orders', async (req, res) => {
+    try {
+        const { customer_name, phone, order_details, order_time } = req.body;
+
+        if (!customer_name || !phone || !order_details || !order_time) {
+            return res.status(400).json({
+                success: false,
+                message: 'All fields are required'
+            });
+        }
+
+        const { data, error } = await supabase
+            .from('orders')
+            .insert([{
+                customer_name: customer_name.trim(),
+                phone: phone.trim(),
+                order_details: order_details.trim(),
+                order_time: order_time,
+                status: 'pending'
+            }])
+            .select();
+
+        if (error) throw error;
+
+        res.json({
+            success: true,
+            message: 'Order created successfully',
+            data: data[0]
+        });
+    } catch (error) {
+        console.error('Error creating order:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to create order'
+        });
+    }
+});
+
+// ========== MESSAGE ENDPOINTS ==========
+app.post('/api/messages', async (req, res) => {
+    try {
+        const { name, email, message } = req.body;
+
+        if (!name || !email || !message) {
+            return res.status(400).json({
+                success: false,
+                message: 'All fields are required'
+            });
+        }
+
+        const { data, error } = await supabase
+            .from('contact_messages')
+            .insert([{
+                name: name.trim(),
+                email: email.trim(),
+                message: message.trim(),
+                is_read: false
+            }])
+            .select();
+
+        if (error) throw error;
+
+        res.json({
+            success: true,
+            message: 'Message sent successfully',
+            data: data[0]
+        });
+    } catch (error) {
+        console.error('Error sending message:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to send message'
+        });
+    }
+});
+
+// ========== ADMIN ENDPOINTS ==========
+// Middleware to check admin authentication
+const authenticateAdmin = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({
+            success: false,
+            message: 'No token provided'
+        });
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    // Simple token check (replace with JWT verification in production)
+    if (token && token.startsWith('burgero-admin-')) {
+        next();
     } else {
         res.status(401).json({
             success: false,
-            message: 'Invalid credentials'
+            message: 'Invalid token'
+        });
+    }
+};
+
+// Get all orders (admin)
+app.get('/api/admin/orders', authenticateAdmin, async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from('orders')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        res.json({
+            success: true,
+            data: data
+        });
+    } catch (error) {
+        console.error('Error fetching orders:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch orders'
         });
     }
 });
 
-// ========== ROOT ROUTE ==========
-app.get('/', (req, res) => {
-    res.json({
-        message: 'Burgero Restaurant API',
-        version: '2.0',
-        endpoints: {
-            health: '/api/health',
-            auth: '/api/auth/login',
-            menu: '/api/menu/items',
-            orders: '/api/orders',
-            messages: '/api/messages'
+// Update order status (admin)
+app.put('/api/admin/orders/:id/status', authenticateAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        if (!['pending', 'preparing', 'ready', 'cancelled'].includes(status)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid status'
+            });
         }
-    });
-});
 
-// ========== ERROR HANDLING ==========
-app.use((err, req, res, next) => {
-    console.error('Server Error:', err.message);
-    console.error('Stack:', err.stack);
+        const { data, error } = await supabase
+            .from('orders')
+            .update({ status })
+            .eq('id', id)
+            .select();
 
-    // Handle CORS errors
-    if (err.message === 'Not allowed by CORS') {
-        return res.status(403).json({
+        if (error) throw error;
+
+        if (data.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Order not found'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Order status updated',
+            data: data[0]
+        });
+    } catch (error) {
+        console.error('Error updating order:', error);
+        res.status(500).json({
             success: false,
-            message: 'CORS Error',
-            allowedOrigins: ['*']
+            message: 'Failed to update order'
         });
     }
-
-    // Handle file upload errors
-    if (err.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).json({
-            success: false,
-            message: 'File too large. Maximum size is 5MB'
-        });
-    }
-
-    res.status(err.status || 500).json({
-        success: false,
-        message: err.message || 'Internal server error',
-        timestamp: new Date().toISOString()
-    });
 });
 
-// ========== START SERVER ==========
+// Get all messages (admin)
+app.get('/api/admin/messages', authenticateAdmin, async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from('contact_messages')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        res.json({
+            success: true,
+            data: data
+        });
+    } catch (error) {
+        console.error('Error fetching messages:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch messages'
+        });
+    }
+});
+
+// Mark message as read (admin)
+app.put('/api/admin/messages/:id/read', authenticateAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const { data, error } = await supabase
+            .from('contact_messages')
+            .update({ is_read: true })
+            .eq('id', id)
+            .select();
+
+        if (error) throw error;
+
+        if (data.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Message not found'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Message marked as read',
+            data: data[0]
+        });
+    } catch (error) {
+        console.error('Error marking message as read:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to mark message as read'
+        });
+    }
+});
+
+// ========== SERVER START ==========
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`📁 Uploads directory: ${path.join(__dirname, 'public/uploads')}`);
-    console.log(`🌐 Health check: http://localhost:${PORT}/api/health`);
-    console.log(`🔧 Test endpoint: http://localhost:${PORT}/api/test`);
-    console.log(`🔐 Test login: http://localhost:${PORT}/api/test-login`);
-    console.log(`✅ CORS enabled for all origins`);
-});
+
+async function startServer() {
+    // Test database connection
+    const connected = await testConnection();
+    if (!connected) {
+        console.error('❌ Cannot start server without database connection');
+        process.exit(1);
+    }
+
+    app.listen(PORT, () => {
+        console.log(`🚀 Server running on port ${PORT}`);
+        console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
+        console.log(`📊 Database: Supabase (PostgreSQL)`);
+        console.log(`📁 Uploads directory: ${uploadsDir}`);
+    });
+}
+
+startServer().catch(console.error);

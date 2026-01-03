@@ -1,27 +1,42 @@
-const mysql = require('mysql2/promise');
+// config/supabase.js
+const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
-const pool = mysql.createPool({
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'burgero',
-    port: process.env.DB_PORT || 3306,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0,
-    enableKeepAlive: true,
-    keepAliveInitialDelay: 0
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
+
+if (!supabaseUrl || !supabaseServiceKey) {
+    console.error('❌ Supabase credentials missing!');
+    console.error('Make sure SUPABASE_URL and SUPABASE_SERVICE_KEY are set in .env');
+    process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+        autoRefreshToken: true,
+        persistSession: false
+    }
 });
 
-// Test database connection
-pool.getConnection()
-    .then(connection => {
-        console.log('✅ Connected to MySQL database');
-        connection.release();
-    })
-    .catch(err => {
-        console.error('❌ Database connection failed:', err.message);
-    });
+// Test connection
+async function testConnection() {
+    try {
+        const { data, error } = await supabase
+            .from('menu_items')
+            .select('count')
+            .limit(1);
 
-module.exports = pool;
+        if (error) {
+            console.error('❌ Failed to connect to Supabase:', error.message);
+            return false;
+        }
+
+        console.log('✅ Successfully connected to Supabase!');
+        return true;
+    } catch (error) {
+        console.error('❌ Connection error:', error.message);
+        return false;
+    }
+}
+
+module.exports = { supabase, testConnection };
