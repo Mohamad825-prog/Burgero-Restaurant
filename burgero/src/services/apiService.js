@@ -8,7 +8,10 @@ import PepperMaize from '../assets/PepperMaize.jpg';
 import TruffleBurger from '../assets/TruffleBurger.jpg';
 import Burgerita from '../assets/Burgerita.jpg';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+// Change this line:
+// const API_BASE_URL = 'http://localhost:5000/api';
+// To this:
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 class ApiService {
     constructor() {
@@ -41,10 +44,17 @@ class ApiService {
         }
 
         if (imagePath.startsWith('/uploads/') || imagePath.startsWith('/images/')) {
-            return `http://localhost:5000${imagePath}`;
+            // Use environment variable or default
+            const baseUrl = process.env.REACT_APP_API_URL ?
+                process.env.REACT_APP_API_URL.replace('/api', '') :
+                'http://localhost:5000';
+            return `${baseUrl}${imagePath}`;
         }
 
-        return `http://localhost:5000${imagePath}`;
+        const baseUrl = process.env.REACT_APP_API_URL ?
+            process.env.REACT_APP_API_URL.replace('/api', '') :
+            'http://localhost:5000';
+        return `${baseUrl}${imagePath}`;
     }
 
     // ORDERS

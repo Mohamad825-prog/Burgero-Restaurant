@@ -15,4 +15,4 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
 
 [build.environment]
-  NODE_VERSION = "18.17.0"
+  NODE_VERSION = "18.17.0" 

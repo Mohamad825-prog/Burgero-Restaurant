@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -19,26 +19,28 @@ const App = () => {
   const closeOrderModal = () => setIsOrderOpen(false);
 
   return (
-    <div>
-      {/* Navbar */}
-      <Navbar openOrderModal={openOrderModal} />
+    <Router>
+      <div>
+        {/* Navbar */}
+        <Navbar openOrderModal={openOrderModal} />
 
-      {/* Pages */}
-      <Routes>
-        <Route path="/" element={<HomePage openOrderModal={openOrderModal} />} />
-        <Route path="/menu" element={<MenuPage />} />
-        <Route path="/meals" element={<MealsPage />} />
-        <Route path="/special" element={<SpecialMenuPage />} />
-        <Route path="/testimonial" element={<TestimonialPage />} />
-        <Route path="/contact" element={<ContactPage />} />
-      </Routes>
+        {/* Pages */}
+        <Routes>
+          <Route path="/" element={<HomePage openOrderModal={openOrderModal} />} />
+          <Route path="/menu" element={<MenuPage />} />
+          <Route path="/meals" element={<MealsPage />} />
+          <Route path="/special" element={<SpecialMenuPage />} />
+          <Route path="/testimonial" element={<TestimonialPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+        </Routes>
 
-      {/* Modal */}
-      <OrderModal isOpen={isOrderOpen} onClose={closeOrderModal} />
+        {/* Modal */}
+        <OrderModal isOpen={isOrderOpen} onClose={closeOrderModal} />
 
-      {/* Footer */}
-      <Footer />
-    </div>
+        {/* Footer */}
+        <Footer />
+      </div>
+    </Router>
   );
 };
 export default App;

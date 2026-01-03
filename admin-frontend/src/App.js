@@ -1,6 +1,6 @@
 // admin-frontend/src/App.js
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, BrowserRouter as Router } from "react-router-dom";
 import adminApiService from './services/adminApiService';
 
 import ProtectedRoute from './components/ProtectedRoute';
@@ -88,72 +88,76 @@ const App = () => {
   // Not authenticated - show login page
   if (!isAuthenticated) {
     return (
-      <Routes>
-        <Route path="/login" element={<Login onLogin={handleLogin} />} />
-        <Route path="*" element={<Navigate to="/login" />} />
-      </Routes>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login onLogin={handleLogin} />} />
+          <Route path="*" element={<Navigate to="/login" />} />
+        </Routes>
+      </Router>
     );
   }
 
   // Authenticated - show admin dashboard
   return (
-    <div className="bg-tertiary min-h-screen">
-      <Navbar onLogout={handleLogout} />
+    <Router>
+      <div className="bg-tertiary min-h-screen">
+        <Navbar onLogout={handleLogout} />
 
-      <div className="pt-16">
-        <Routes>
-          <Route path="/" element={
-            <ProtectedRoute>
-              <HomePage />
-            </ProtectedRoute>
-          } />
-          <Route path="/menu" element={
-            <ProtectedRoute>
-              <MenuPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/meals" element={
-            <ProtectedRoute>
-              <MealsPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/special" element={
-            <ProtectedRoute>
-              <SpecialMenuPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/testimonial" element={
-            <ProtectedRoute>
-              <TestimonialPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/contact-messages" element={
-            <ProtectedRoute>
-              <ContactMessagesPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/orders" element={
-            <ProtectedRoute>
-              <OrderManagementPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/add-item" element={
-            <ProtectedRoute>
-              <AddItemPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/edit-item/:id" element={
-            <ProtectedRoute>
-              <EditMenuItemPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/login" element={<Navigate to="/" />} />
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
+        <div className="pt-16">
+          <Routes>
+            <Route path="/" element={
+              <ProtectedRoute>
+                <HomePage />
+              </ProtectedRoute>
+            } />
+            <Route path="/menu" element={
+              <ProtectedRoute>
+                <MenuPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/meals" element={
+              <ProtectedRoute>
+                <MealsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/special" element={
+              <ProtectedRoute>
+                <SpecialMenuPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/testimonial" element={
+              <ProtectedRoute>
+                <TestimonialPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/contact-messages" element={
+              <ProtectedRoute>
+                <ContactMessagesPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/orders" element={
+              <ProtectedRoute>
+                <OrderManagementPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/add-item" element={
+              <ProtectedRoute>
+                <AddItemPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/edit-item/:id" element={
+              <ProtectedRoute>
+                <EditMenuItemPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/login" element={<Navigate to="/" />} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </div>
+
+        <Footer />
       </div>
-
-      <Footer />
-    </div>
+    </Router>
   );
 };
 
