@@ -1,4 +1,3 @@
-// burgero-backend/server.js
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -8,23 +7,24 @@ require('dotenv').config();
 
 const app = express();
 
-// ========== CORS CONFIGURATION ==========
+// ========== CORS CONFIGURATION WITH YOUR ACTUAL URLS ==========
 const allowedOrigins = [
-    'http://localhost:3000',  // User frontend (dev)
-    'http://localhost:3001',  // Admin frontend (dev)
-    'https://mohamad825-prog.github.io',  // Your GitHub Pages
-    'https://*.netlify.app',  // Netlify deployments
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'https://burgero-user-1.netlify.app',
+    'https://burgero-admin-1.netlify.app',
+    'https://mohamad825-prog.github.io'
 ];
 
 const corsOptions = {
     origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
 
-        if (allowedOrigins.indexOf(origin) !== -1 || origin.includes('netlify.app')) {
+        if (allowedOrigins.includes(origin) || origin.includes('.netlify.app')) {
             callback(null, true);
         } else {
-            callback(new Error('Not allowed by CORS'));
+            console.log('🚫 CORS blocked:', origin);
+            callback(new Error(`Not allowed by CORS. Origin: ${origin}`));
         }
     },
     credentials: true,
@@ -33,27 +33,20 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Create uploads directory if it doesn't exist
+// Create uploads directory
 const uploadsDir = path.join(__dirname, 'public/uploads');
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
 }
-
-// Serve static files (for image uploads)
 app.use('/uploads', express.static(uploadsDir));
 
-// ========== HEALTH CHECK ENDPOINT ==========
+// ========== HEALTH CHECK ==========
 app.get('/api/health', async (req, res) => {
     try {
-        // Test Supabase connection
-        const { data, error } = await supabase
-            .from('menu_items')
-            .select('count')
-            .limit(1);
-
+        const { data, error } = await supabase.from('menu_items').select('count').limit(1);
         if (error) throw error;
 
         res.json({
@@ -61,24 +54,49 @@ app.get('/api/health', async (req, res) => {
             status: 'healthy',
             service: 'Burgero Restaurant API',
             version: '2.0',
-            database: 'Supabase',
+            database: 'Supabase (PostgreSQL)',
+            cors: {
+                allowedOrigins: allowedOrigins,
+                userFrontend: 'https://burgero-user-1.netlify.app',
+                adminFrontend: 'https://burgero-admin-1.netlify.app'
+            },
             timestamp: new Date().toISOString()
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            status: 'unhealthy',
             error: error.message
         });
     }
+});
+
+// ========== TEST ENDPOINT ==========
+app.get('/api/test', (req, res) => {
+    res.json({
+        success: true,
+        message: 'API is working!',
+        endpoints: {
+            health: '/api/health',
+            menu: '/api/menu/items',
+            special: '/api/menu/special',
+            orders: '/api/orders',
+            messages: '/api/messages',
+            admin: {
+                orders: '/api/admin/orders',
+                messages: '/api/admin/messages'
+            }
+        },
+        cors: {
+            origin: req.headers.origin || 'No origin header',
+            allowed: allowedOrigins.includes(req.headers.origin)
+        }
+    });
 });
 
 // ========== AUTH ENDPOINTS ==========
 app.post('/api/auth/login', async (req, res) => {
     try {
         const { username, password } = req.body;
-
-        console.log('Login attempt for:', username);
 
         if (!username || !password) {
             return res.status(400).json({
@@ -87,7 +105,7 @@ app.post('/api/auth/login', async (req, res) => {
             });
         }
 
-        // Check admin credentials in Supabase
+        // Check admin in Supabase
         const { data: admin, error } = await supabase
             .from('admin_users')
             .select('*')
@@ -95,17 +113,14 @@ app.post('/api/auth/login', async (req, res) => {
             .single();
 
         if (error || !admin) {
-            console.log('Admin not found or error:', error?.message);
             return res.status(401).json({
                 success: false,
                 message: 'Invalid credentials'
             });
         }
 
-        // For now, we'll use simple password check
-        // In production, you should use bcrypt to compare hashed passwords
-        if (password === 'admin123') {  // Your default password
-            // Generate a simple token (replace with JWT in production)
+        // Simple password check (use bcrypt in production)
+        if (password === 'admin123') {
             const token = `burgero-admin-${Date.now()}-${admin.id}`;
 
             res.json({
@@ -143,9 +158,20 @@ app.get('/api/menu/items', async (req, res) => {
 
         if (error) throw error;
 
+        // Transform data to match your frontend expectations
+        const transformedData = data.map(item => ({
+            id: item.id,
+            name: item.name,
+            price: typeof item.price === 'number' ? `$${item.price.toFixed(2)}` : item.price,
+            description: item.description || '',
+            image_url: item.image_url,
+            image: item.image_url, // For compatibility with your frontend
+            is_default: item.is_default
+        }));
+
         res.json({
             success: true,
-            data: data
+            data: transformedData
         });
     } catch (error) {
         console.error('Error fetching menu items:', error);
@@ -166,9 +192,20 @@ app.get('/api/menu/special', async (req, res) => {
 
         if (error) throw error;
 
+        // Transform data
+        const transformedData = data.map(item => ({
+            id: item.id,
+            title: item.title,
+            price: typeof item.price === 'number' ? `$${item.price.toFixed(2)}` : item.price,
+            stars: parseFloat(item.stars) || 4.5,
+            image_url: item.image_url,
+            img: item.image_url, // For compatibility
+            is_default: item.is_default
+        }));
+
         res.json({
             success: true,
-            data: data
+            data: transformedData
         });
     } catch (error) {
         console.error('Error fetching special items:', error);
@@ -257,7 +294,6 @@ app.post('/api/messages', async (req, res) => {
 });
 
 // ========== ADMIN ENDPOINTS ==========
-// Middleware to check admin authentication
 const authenticateAdmin = (req, res, next) => {
     const authHeader = req.headers.authorization;
 
@@ -270,7 +306,6 @@ const authenticateAdmin = (req, res, next) => {
 
     const token = authHeader.split(' ')[1];
 
-    // Simple token check (replace with JWT verification in production)
     if (token && token.startsWith('burgero-admin-')) {
         next();
     } else {
@@ -281,7 +316,7 @@ const authenticateAdmin = (req, res, next) => {
     }
 };
 
-// Get all orders (admin)
+// GET all orders (admin)
 app.get('/api/admin/orders', authenticateAdmin, async (req, res) => {
     try {
         const { data, error } = await supabase
@@ -304,7 +339,7 @@ app.get('/api/admin/orders', authenticateAdmin, async (req, res) => {
     }
 });
 
-// Update order status (admin)
+// UPDATE order status (admin)
 app.put('/api/admin/orders/:id/status', authenticateAdmin, async (req, res) => {
     try {
         const { id } = req.params;
@@ -325,7 +360,7 @@ app.put('/api/admin/orders/:id/status', authenticateAdmin, async (req, res) => {
 
         if (error) throw error;
 
-        if (data.length === 0) {
+        if (!data || data.length === 0) {
             return res.status(404).json({
                 success: false,
                 message: 'Order not found'
@@ -346,7 +381,32 @@ app.put('/api/admin/orders/:id/status', authenticateAdmin, async (req, res) => {
     }
 });
 
-// Get all messages (admin)
+// DELETE order (admin)
+app.delete('/api/admin/orders/:id', authenticateAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const { error } = await supabase
+            .from('orders')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+
+        res.json({
+            success: true,
+            message: 'Order deleted successfully'
+        });
+    } catch (error) {
+        console.error('Error deleting order:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to delete order'
+        });
+    }
+});
+
+// GET all messages (admin)
 app.get('/api/admin/messages', authenticateAdmin, async (req, res) => {
     try {
         const { data, error } = await supabase
@@ -369,7 +429,7 @@ app.get('/api/admin/messages', authenticateAdmin, async (req, res) => {
     }
 });
 
-// Mark message as read (admin)
+// MARK message as read (admin)
 app.put('/api/admin/messages/:id/read', authenticateAdmin, async (req, res) => {
     try {
         const { id } = req.params;
@@ -382,7 +442,7 @@ app.put('/api/admin/messages/:id/read', authenticateAdmin, async (req, res) => {
 
         if (error) throw error;
 
-        if (data.length === 0) {
+        if (!data || data.length === 0) {
             return res.status(404).json({
                 success: false,
                 message: 'Message not found'
@@ -403,11 +463,35 @@ app.put('/api/admin/messages/:id/read', authenticateAdmin, async (req, res) => {
     }
 });
 
+// DELETE message (admin)
+app.delete('/api/admin/messages/:id', authenticateAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const { error } = await supabase
+            .from('contact_messages')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+
+        res.json({
+            success: true,
+            message: 'Message deleted successfully'
+        });
+    } catch (error) {
+        console.error('Error deleting message:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to delete message'
+        });
+    }
+});
+
 // ========== SERVER START ==========
 const PORT = process.env.PORT || 5000;
 
 async function startServer() {
-    // Test database connection
     const connected = await testConnection();
     if (!connected) {
         console.error('❌ Cannot start server without database connection');
@@ -416,9 +500,11 @@ async function startServer() {
 
     app.listen(PORT, () => {
         console.log(`🚀 Server running on port ${PORT}`);
+        console.log(`🌐 User Frontend: https://burgero-user-1.netlify.app`);
+        console.log(`🔧 Admin Frontend: https://burgero-admin-1.netlify.app`);
+        console.log(`📊 Database: Supabase connected`);
         console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
-        console.log(`📊 Database: Supabase (PostgreSQL)`);
-        console.log(`📁 Uploads directory: ${uploadsDir}`);
+        console.log(`📝 Test endpoint: http://localhost:${PORT}/api/test`);
     });
 }
 
