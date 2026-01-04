@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -19,23 +19,21 @@ const App = () => {
   const closeOrderModal = () => setIsOrderOpen(false);
 
   return (
-    <Router> {/* NO basename here! */}
-      <div>
-        <Navbar openOrderModal={openOrderModal} />
+    <div>
+      <Navbar openOrderModal={openOrderModal} />
 
-        <Routes>
-          <Route path="/" element={<HomePage openOrderModal={openOrderModal} />} />
-          <Route path="/menu" element={<MenuPage />} />
-          <Route path="/meals" element={<MealsPage />} />
-          <Route path="/special" element={<SpecialMenuPage />} />
-          <Route path="/testimonial" element={<TestimonialPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-        </Routes>
+      <Routes>
+        <Route path="/" element={<HomePage openOrderModal={openOrderModal} />} />
+        <Route path="/menu" element={<MenuPage />} />
+        <Route path="/meals" element={<MealsPage />} />
+        <Route path="/special" element={<SpecialMenuPage />} />
+        <Route path="/testimonial" element={<TestimonialPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+      </Routes>
 
-        <OrderModal isOpen={isOrderOpen} onClose={closeOrderModal} />
-        <Footer />
-      </div>
-    </Router>
+      <OrderModal isOpen={isOrderOpen} onClose={closeOrderModal} />
+      <Footer />
+    </div>
   );
 };
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Navigate, BrowserRouter as Router } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import adminApiService from './services/adminApiService';
 
 import ProtectedRoute from './components/ProtectedRoute';
@@ -23,7 +23,6 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user has a valid token
     const checkAuth = async () => {
       try {
         const token = localStorage.getItem('auth_token');
@@ -34,13 +33,11 @@ const App = () => {
           return;
         }
 
-        // Verify token validity with backend
         const isValid = await adminApiService.validateToken();
 
         if (isValid) {
           setIsAuthenticated(true);
         } else {
-          // Token is invalid, clear it
           handleLogout();
         }
       } catch (error) {
@@ -60,19 +57,11 @@ const App = () => {
   };
 
   const handleLogout = () => {
-    // Clear all authentication data
     adminApiService.removeToken();
     setIsAuthenticated(false);
-
-    // Clear form data from localStorage if any
-    localStorage.removeItem('burgero_orders_fallback');
-    localStorage.removeItem('burgero_messages_fallback');
-
-    // Force navigation to login
     window.location.href = "/login";
   };
 
-  // Show loading screen while checking auth
   if (isLoading) {
     return (
       <div className="min-h-screen bg-tertiary flex justify-center items-center">
@@ -84,79 +73,73 @@ const App = () => {
     );
   }
 
-  // Not authenticated - show login page
   if (!isAuthenticated) {
     return (
-      <Router>
-        <Routes>
-          <Route path="/login" element={<Login onLogin={handleLogin} />} />
-          <Route path="*" element={<Navigate to="/login" />} />
-        </Routes>
-      </Router>
+      <Routes>
+        <Route path="/login" element={<Login onLogin={handleLogin} />} />
+        <Route path="*" element={<Navigate to="/login" />} />
+      </Routes>
     );
   }
 
-  // Authenticated - show admin dashboard
   return (
-    <Router> {/* NO basename here! */}
-      <div className="bg-tertiary min-h-screen">
-        <Navbar onLogout={handleLogout} />
+    <div className="bg-tertiary min-h-screen">
+      <Navbar onLogout={handleLogout} />
 
-        <div className="pt-16">
-          <Routes>
-            <Route path="/" element={
-              <ProtectedRoute>
-                <HomePage />
-              </ProtectedRoute>
-            } />
-            <Route path="/menu" element={
-              <ProtectedRoute>
-                <MenuPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/meals" element={
-              <ProtectedRoute>
-                <MealsPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/special" element={
-              <ProtectedRoute>
-                <SpecialMenuPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/testimonial" element={
-              <ProtectedRoute>
-                <TestimonialPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/contact-messages" element={
-              <ProtectedRoute>
-                <ContactMessagesPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/orders" element={
-              <ProtectedRoute>
-                <OrderManagementPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/add-item" element={
-              <ProtectedRoute>
-                <AddItemPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/edit-item/:id" element={
-              <ProtectedRoute>
-                <EditMenuItemPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/login" element={<Navigate to="/" />} />
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
-        </div>
-
-        <Footer />
+      <div className="pt-16">
+        <Routes>
+          <Route path="/" element={
+            <ProtectedRoute>
+              <HomePage />
+            </ProtectedRoute>
+          } />
+          <Route path="/menu" element={
+            <ProtectedRoute>
+              <MenuPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/meals" element={
+            <ProtectedRoute>
+              <MealsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/special" element={
+            <ProtectedRoute>
+              <SpecialMenuPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/testimonial" element={
+            <ProtectedRoute>
+              <TestimonialPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/contact-messages" element={
+            <ProtectedRoute>
+              <ContactMessagesPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/orders" element={
+            <ProtectedRoute>
+              <OrderManagementPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/add-item" element={
+            <ProtectedRoute>
+              <AddItemPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/edit-item/:id" element={
+            <ProtectedRoute>
+              <EditMenuItemPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/login" element={<Navigate to="/" />} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
       </div>
-    </Router>
+
+      <Footer />
+    </div>
   );
 };
 
