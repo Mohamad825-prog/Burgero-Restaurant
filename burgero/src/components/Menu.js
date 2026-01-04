@@ -31,6 +31,12 @@ const Menu = () => {
             }
 
             console.log('Menu items loaded:', items.length, 'items');
+
+            // Debug: Check what image URLs we're getting
+            items.forEach(item => {
+                console.log(`Item: ${item.name}, Image: ${item.image}`);
+            });
+
             setMenuData(items);
             setConnectionStatus('online');
         } catch (error) {

@@ -39,22 +39,27 @@ class ApiService {
     getImageUrl(imagePath) {
         if (!imagePath) return null;
 
+        // If it's already a full URL, use it
         if (imagePath.startsWith('http')) {
             return imagePath;
         }
 
-        if (imagePath.startsWith('/uploads/') || imagePath.startsWith('/images/')) {
-            // Use environment variable or default
+        // If it's a local image path (starts with /images/)
+        if (imagePath.startsWith('/images/')) {
+            // For Vercel deployment - images are served from the frontend
+            return imagePath;  // ← Just return the path as-is
+        }
+
+        // For backend uploaded images (if you implement uploads later)
+        if (imagePath.startsWith('/uploads/')) {
             const baseUrl = process.env.REACT_APP_API_URL ?
                 process.env.REACT_APP_API_URL.replace('/api', '') :
                 'http://localhost:5000';
             return `${baseUrl}${imagePath}`;
         }
 
-        const baseUrl = process.env.REACT_APP_API_URL ?
-            process.env.REACT_APP_API_URL.replace('/api', '') :
-            'http://localhost:5000';
-        return `${baseUrl}${imagePath}`;
+        // Default: return as-is
+        return imagePath;
     }
 
     // ORDERS
