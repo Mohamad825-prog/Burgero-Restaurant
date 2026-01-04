@@ -337,7 +337,7 @@ class AdminApiService {
     // ========== ORDERS ==========
     async getOrders() {
         try {
-            const data = await this.fetchWithRetry(`${API_BASE_URL}/orders`, {
+            const data = await this.fetchWithRetry(`${API_BASE_URL}/admin/orders`, {
                 method: 'GET',
                 headers: this.getHeaders()
             });
@@ -352,7 +352,7 @@ class AdminApiService {
 
     async getOrderById(id) {
         try {
-            const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
+            const response = await fetch(`${API_BASE_URL}/admin/orders/${id}`, {
                 method: 'GET',
                 headers: this.getHeaders()
             });
@@ -369,7 +369,7 @@ class AdminApiService {
         try {
             console.log(`Updating order ${id} status to ${status}`);
 
-            const response = await fetch(`${API_BASE_URL}/orders/${id}/status`, {
+            const response = await fetch(`${API_BASE_URL}/admin/orders/${id}/status`, {
                 method: 'PUT',
                 headers: this.getHeaders(),
                 body: JSON.stringify({ status })
@@ -404,7 +404,7 @@ class AdminApiService {
 
     async deleteOrder(id) {
         try {
-            const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
+            const response = await fetch(`${API_BASE_URL}/admin/orders/${id}`, {
                 method: 'DELETE',
                 headers: this.getHeaders()
             });
@@ -424,7 +424,7 @@ class AdminApiService {
 
     async getOrderStats() {
         try {
-            const response = await fetch(`${API_BASE_URL}/orders/stats/summary`, {
+            const response = await fetch(`${API_BASE_URL}/admin/orders/stats/summary`, {
                 method: 'GET',
                 headers: this.getHeaders()
             });
@@ -440,7 +440,7 @@ class AdminApiService {
     // ========== MESSAGES ==========
     async getMessages() {
         try {
-            const response = await fetch(`${API_BASE_URL}/messages`, {
+            const response = await fetch(`${API_BASE_URL}/admin/messages`, {
                 method: 'GET',
                 headers: this.getHeaders()
             });
@@ -455,7 +455,7 @@ class AdminApiService {
 
     async getMessageById(id) {
         try {
-            const response = await fetch(`${API_BASE_URL}/messages/${id}`, {
+            const response = await fetch(`${API_BASE_URL}/admin/messages/${id}`, {
                 method: 'GET',
                 headers: this.getHeaders()
             });
@@ -472,7 +472,7 @@ class AdminApiService {
         try {
             console.log(`Marking message ${id} as read`);
 
-            const response = await fetch(`${API_BASE_URL}/messages/${id}/read`, {
+            const response = await fetch(`${API_BASE_URL}/admin/messages/${id}/read`, {
                 method: 'PUT',
                 headers: this.getHeaders()
             });
@@ -507,7 +507,7 @@ class AdminApiService {
         try {
             console.log('Marking all messages as read');
 
-            const response = await fetch(`${API_BASE_URL}/messages/read/all`, {
+            const response = await fetch(`${API_BASE_URL}/admin/messages/read/all`, {
                 method: 'PUT',
                 headers: this.getHeaders()
             });
@@ -540,7 +540,7 @@ class AdminApiService {
 
     async deleteMessage(id) {
         try {
-            const response = await fetch(`${API_BASE_URL}/messages/${id}`, {
+            const response = await fetch(`${API_BASE_URL}/admin/messages/${id}`, {
                 method: 'DELETE',
                 headers: this.getHeaders()
             });
@@ -560,7 +560,7 @@ class AdminApiService {
 
     async deleteAllMessages() {
         try {
-            const response = await fetch(`${API_BASE_URL}/messages`, {
+            const response = await fetch(`${API_BASE_URL}/admin/messages`, {
                 method: 'DELETE',
                 headers: this.getHeaders()
             });
@@ -580,7 +580,7 @@ class AdminApiService {
 
     async getMessageStats() {
         try {
-            const response = await fetch(`${API_BASE_URL}/messages/stats`, {
+            const response = await fetch(`${API_BASE_URL}/admin/messages/stats`, {
                 method: 'GET',
                 headers: this.getHeaders()
             });
