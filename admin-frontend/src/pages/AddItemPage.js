@@ -356,14 +356,7 @@ const AddItemPage = () => {
                     </div>
                 </form>
 
-                <div className="mt-8 space-y-4">
-                    <div className="p-4 bg-yellow-50 rounded-lg">
-                        <h3 className="font-bold text-yellow-800 mb-2">Debug Info:</h3>
-                        <p className="text-yellow-700 text-sm">Backend URL: http://localhost:5000</p>
-                        <p className="text-yellow-700 text-sm">Auth Token: {localStorage.getItem('auth_token') ? 'Present' : 'Missing'}</p>
-                        <p className="text-yellow-700 text-sm">Item Type: {itemType}</p>
-                    </div>
-                </div>
+
             </div>
         </div>
     );
