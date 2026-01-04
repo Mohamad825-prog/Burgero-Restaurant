@@ -1,4 +1,3 @@
-// admin-frontend/src/components/Menu.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import MenuCard from '../layouts/MenuCard.js';

@@ -1,4 +1,3 @@
-// admin-frontend/src/pages/OrderManagementPage.js
 import React, { useState, useEffect, useCallback } from "react";
 import adminApiService from '../services/adminApiService';
 

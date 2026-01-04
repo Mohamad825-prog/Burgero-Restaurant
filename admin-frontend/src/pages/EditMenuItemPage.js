@@ -1,4 +1,3 @@
-// admin-frontend/src/pages/EditMenuItemPage.js
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import adminApiService from '../services/adminApiService';
