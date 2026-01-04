@@ -2,7 +2,7 @@
   "name": "admin-frontend",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://your-admin-frontend.vercel.app",
+  "homepage": ".",
   "engines": {
     "node": "24.x",
     "npm": "10.x"
@@ -23,7 +23,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "CI=false react-scripts build",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
