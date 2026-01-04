@@ -13,10 +13,12 @@ const allowedOrigins = [
     'http://localhost:3001',                      // Admin frontend (dev)
     process.env.CORS_ORIGIN_USER,                 // User frontend (production)
     process.env.CORS_ORIGIN_ADMIN,                // Admin frontend (production)
-    'https://*.vercel.app',                       // Vercel deployments
-    'https://burgero-user.vercel.app',            // Specific user Vercel
-    'https://burgero-admin.vercel.app',           // Specific admin Vercel
-    'https://mohamad825-prog.github.io',          // GitHub Pages backup
+    'https://burgerouser.vercel.app',            // Your Vercel URL
+    'https://burgerouser-*.vercel.app',          // Wildcard for preview
+    'https://*.vercel.app',                      // All Vercel deployments
+    'https://burgero-user.vercel.app',           // Specific user Vercel
+    'https://burgero-admin.vercel.app',          // Specific admin Vercel
+    'https://mohamad825-prog.github.io',         // GitHub Pages backup
 ].filter(Boolean); // Remove any undefined values
 
 const corsOptions = {
