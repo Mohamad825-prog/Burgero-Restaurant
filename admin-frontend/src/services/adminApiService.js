@@ -337,16 +337,16 @@ class AdminApiService {
     // ========== ORDERS ==========
     async getOrders() {
         try {
-            const response = await fetch(`${API_BASE_URL}/orders`, {
+            const data = await this.fetchWithRetry(`${API_BASE_URL}/orders`, {
                 method: 'GET',
                 headers: this.getHeaders()
             });
 
-            const data = await response.json();
             return data.data || [];
         } catch (error) {
             console.error('Error fetching orders:', error);
-            throw error;
+            // Fallback to localStorage
+            return JSON.parse(localStorage.getItem('burgero_orders_fallback') || '[]');
         }
     }
 
@@ -620,6 +620,23 @@ class AdminApiService {
         }
 
         return { success: true };
+    }
+
+    // Add retry logic for API calls
+    async fetchWithRetry(url, options, retries = 3) {
+        for (let i = 0; i < retries; i++) {
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                if (i === retries - 1) throw error;
+                // Wait before retrying (exponential backoff)
+                await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, i)));
+            }
+        }
     }
 }
 

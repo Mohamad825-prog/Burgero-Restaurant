@@ -13,6 +13,9 @@ const allowedOrigins = [
     'http://localhost:3001',                      // Admin frontend (dev)
     process.env.CORS_ORIGIN_USER,                 // User frontend (production)
     process.env.CORS_ORIGIN_ADMIN,                // Admin frontend (production)
+    'https://*.vercel.app',                       // Vercel deployments
+    'https://burgero-user.vercel.app',            // Specific user Vercel
+    'https://burgero-admin.vercel.app',           // Specific admin Vercel
     'https://mohamad825-prog.github.io',          // GitHub Pages backup
 ].filter(Boolean); // Remove any undefined values
 
@@ -22,7 +25,10 @@ const corsOptions = {
         if (!origin) return callback(null, true);
 
         // Check if the origin is allowed
-        if (allowedOrigins.includes(origin) || origin.includes('.netlify.app')) {
+        if (allowedOrigins.includes(origin) ||
+            origin.includes('.vercel.app') ||
+            origin.includes('.netlify.app') ||
+            origin.includes('localhost')) {
             callback(null, true);
         } else {
             console.log('🚫 CORS blocked origin:', origin);
@@ -30,8 +36,8 @@ const corsOptions = {
         }
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Test-Token']
 };
 
 app.use(cors(corsOptions));
@@ -516,4 +522,4 @@ async function startServer() {
     });
 }
 
-startServer().catch(console.error); 
+startServer().catch(console.error);

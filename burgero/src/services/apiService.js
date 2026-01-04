@@ -88,24 +88,17 @@ class ApiService {
             };
 
         } catch (error) {
-            console.error('Error creating order:', error);
-
-            const fallbackOrder = {
-                id: Date.now(),
-                ...orderData,
-                status: 'pending',
-                date: new Date().toISOString()
-            };
-
-            const existingOrders = JSON.parse(localStorage.getItem('burgero_orders_fallback') || '[]');
-            existingOrders.push(fallbackOrder);
-            localStorage.setItem('burgero_orders_fallback', JSON.stringify(existingOrders));
-
-            return {
-                success: true,
-                data: fallbackOrder,
-                message: 'Order received (saved locally).'
-            };
+            return await this.handleApiError(
+                error,
+                'burgero_orders_fallback',
+                {
+                    customer_name: orderData.name,
+                    phone: orderData.phone,
+                    order_details: orderData.order,
+                    order_time: orderData.time,
+                    status: 'pending'
+                }
+            );
         }
     }
 
@@ -354,6 +347,37 @@ class ApiService {
                 message: 'Cannot connect to backend'
             };
         }
+    }
+
+    // Add better error handling in all methods:
+    async handleApiError(error, fallbackKey, fallbackData) {
+        console.error('API Error:', error.message);
+
+        // Check if it's a network error
+        if (error.message.includes('Failed to fetch') ||
+            error.message.includes('NetworkError') ||
+            error.message.includes('Network request failed')) {
+
+            // Store in localStorage for offline mode
+            const existingData = JSON.parse(localStorage.getItem(fallbackKey) || '[]');
+            const newData = {
+                ...fallbackData,
+                id: Date.now(),
+                date: new Date().toISOString(),
+                offline: true
+            };
+            existingData.push(newData);
+            localStorage.setItem(fallbackKey, JSON.stringify(existingData));
+
+            return {
+                success: true,
+                data: newData,
+                message: 'Data saved locally (offline mode)',
+                offline: true
+            };
+        }
+
+        throw error;
     }
 }
 
