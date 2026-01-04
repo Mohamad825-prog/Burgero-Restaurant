@@ -53,6 +53,29 @@ if (!fs.existsSync(uploadsDir)) {
 }
 app.use('/uploads', express.static(uploadsDir));
 
+// ========== ADMIN AUTHENTICATION MIDDLEWARE ==========
+const authenticateAdmin = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({
+            success: false,
+            message: 'No token provided'
+        });
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    if (token && token.startsWith('burgero-admin-')) {
+        next();
+    } else {
+        res.status(401).json({
+            success: false,
+            message: 'Invalid token'
+        });
+    }
+};
+
 // ========== HEALTH CHECK ==========
 app.get('/api/health', async (req, res) => {
     try {
@@ -520,29 +543,6 @@ app.post('/api/messages', async (req, res) => {
     }
 });
 
-// ========== ADMIN ENDPOINTS ==========
-const authenticateAdmin = (req, res, next) => {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({
-            success: false,
-            message: 'No token provided'
-        });
-    }
-
-    const token = authHeader.split(' ')[1];
-
-    if (token && token.startsWith('burgero-admin-')) {
-        next();
-    } else {
-        res.status(401).json({
-            success: false,
-            message: 'Invalid token'
-        });
-    }
-};
-
 // GET all orders (admin)
 app.get('/api/admin/orders', authenticateAdmin, async (req, res) => {
     try {
@@ -735,4 +735,4 @@ async function startServer() {
     });
 }
 
-startServer().catch(console.error); 
+startServer().catch(console.error);
