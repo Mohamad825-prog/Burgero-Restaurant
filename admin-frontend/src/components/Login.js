@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import adminApiService from '../services/adminApiService';
 
 const Login = ({ onLogin }) => {
-    const [username, setUsername] = useState("");  // REMOVED DEFAULT VALUE
-    const [password, setPassword] = useState("");  // REMOVED DEFAULT VALUE
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [backendStatus, setBackendStatus] = useState("checking...");
@@ -19,7 +19,8 @@ const Login = ({ onLogin }) => {
     const checkBackendStatus = async () => {
         try {
             setBackendStatus("Checking backend...");
-            const response = await fetch('http://localhost:5000/api/health');
+            const backendUrl = process.env.REACT_APP_API_URL?.replace('/api', '') || 'https://burgero-restaurant.onrender.com';
+            const response = await fetch(`${backendUrl}/api/health`);
             const data = await response.json();
             setBackendStatus(`✅ Backend: ${data.service} (${data.status})`);
             return true;
@@ -37,7 +38,7 @@ const Login = ({ onLogin }) => {
         try {
             console.log('=== LOGIN ATTEMPT ===');
             console.log('Username:', username);
-            console.log('Backend URL:', 'http://localhost:5000/api/auth/login');
+            console.log('Backend URL:', process.env.REACT_APP_API_URL?.replace('/api', '') || 'https://burgero-restaurant.onrender.com');
 
             // Validate inputs
             if (!username.trim() || !password.trim()) {
@@ -73,22 +74,10 @@ const Login = ({ onLogin }) => {
 
             // Provide helpful suggestions
             if (err.message.includes('Invalid credentials') || err.message.includes('User not found')) {
-                errorMessage = `
-                    Invalid credentials.
-                    
-                    Please use:
-                    Username: admin
-                    Password: admin123
-                `;
+                errorMessage = `Invalid credentials.\n\nPlease use:\nUsername: admin\nPassword: admin123`;
             } else if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
-                errorMessage = `
-                    Cannot connect to backend server.
-                    
-                    Please ensure:
-                    1. Backend is running (cd burgero-backend && npm start)
-                    2. You see "Server running on port 5000"
-                    3. Open http://localhost:5000/api/health in browser
-                `;
+                const backendUrl = process.env.REACT_APP_API_URL?.replace('/api', '') || 'https://burgero-restaurant.onrender.com';
+                errorMessage = `Cannot connect to backend server.\n\nPlease ensure:\n1. Backend is running on Render\n2. Check if backend URL is correct\n3. Open ${backendUrl}/api/health in browser`;
             }
 
             setError(errorMessage);
@@ -102,7 +91,7 @@ const Login = ({ onLogin }) => {
             setIsLoading(true);
             setError("Creating admin user...");
 
-            const response = await fetch('http://localhost:5000/api/auth/ensure-admin', {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/ensure-admin`, {
                 method: 'POST'
             });
 
@@ -173,7 +162,7 @@ const Login = ({ onLogin }) => {
                         <h3 className="font-bold text-gray-800 text-sm mb-2">Debug Info:</h3>
                         <p className="text-gray-600 text-xs">
                             Token in localStorage: {localStorage.getItem('auth_token') ? 'Present' : 'Missing'}<br />
-                            Backend URL: http://localhost:5000<br />
+                            Backend URL: {process.env.REACT_APP_API_URL?.replace('/api', '') || 'https://burgero-restaurant.onrender.com'}<br />
                             Login endpoint: /api/auth/login<br />
                         </p>
                         <button
@@ -228,7 +217,7 @@ const Login = ({ onLogin }) => {
                                     Create Admin User
                                 </button>
                                 <a
-                                    href="http://localhost:5000/api/health"
+                                    href={`${process.env.REACT_APP_API_URL?.replace('/api', '') || 'https://burgero-restaurant.onrender.com'}/api/health`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-xs bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
