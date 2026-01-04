@@ -7,23 +7,25 @@ require('dotenv').config();
 
 const app = express();
 
-// ========== CORS CONFIGURATION WITH YOUR ACTUAL URLS ==========
+// ========== CORS CONFIGURATION WITH ENVIRONMENT VARIABLES ==========
 const allowedOrigins = [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'https://burgero-user-1.netlify.app',
-    'https://burgero-admin-1.netlify.app',
-    'https://mohamad825-prog.github.io'
-];
+    'http://localhost:3000',                      // User frontend (dev)
+    'http://localhost:3001',                      // Admin frontend (dev)
+    process.env.CORS_ORIGIN_USER,                 // User frontend (production)
+    process.env.CORS_ORIGIN_ADMIN,                // Admin frontend (production)
+    'https://mohamad825-prog.github.io',          // GitHub Pages backup
+].filter(Boolean); // Remove any undefined values
 
 const corsOptions = {
     origin: function (origin, callback) {
+        // Allow requests with no origin (mobile apps, curl, etc.)
         if (!origin) return callback(null, true);
 
+        // Check if the origin is allowed
         if (allowedOrigins.includes(origin) || origin.includes('.netlify.app')) {
             callback(null, true);
         } else {
-            console.log('🚫 CORS blocked:', origin);
+            console.log('🚫 CORS blocked origin:', origin);
             callback(new Error(`Not allowed by CORS. Origin: ${origin}`));
         }
     },
@@ -57,8 +59,9 @@ app.get('/api/health', async (req, res) => {
             database: 'Supabase (PostgreSQL)',
             cors: {
                 allowedOrigins: allowedOrigins,
-                userFrontend: 'https://burgero-user-1.netlify.app',
-                adminFrontend: 'https://burgero-admin-1.netlify.app'
+                userFrontend: process.env.CORS_ORIGIN_USER || 'Not configured',
+                adminFrontend: process.env.CORS_ORIGIN_ADMIN || 'Not configured',
+                environment: process.env.NODE_ENV || 'development'
             },
             timestamp: new Date().toISOString()
         });
@@ -88,7 +91,12 @@ app.get('/api/test', (req, res) => {
         },
         cors: {
             origin: req.headers.origin || 'No origin header',
-            allowed: allowedOrigins.includes(req.headers.origin)
+            allowed: allowedOrigins.includes(req.headers.origin) || req.headers.origin?.includes('.netlify.app') || false
+        },
+        environment: {
+            node_env: process.env.NODE_ENV,
+            cors_user: process.env.CORS_ORIGIN_USER || 'Not set',
+            cors_admin: process.env.CORS_ORIGIN_ADMIN || 'Not set'
         }
     });
 });
@@ -500,11 +508,11 @@ async function startServer() {
 
     app.listen(PORT, () => {
         console.log(`🚀 Server running on port ${PORT}`);
-        console.log(`🌐 User Frontend: https://burgero-user-1.netlify.app`);
-        console.log(`🔧 Admin Frontend: https://burgero-admin-1.netlify.app`);
+        console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
+        console.log(`🔗 CORS User Frontend: ${process.env.CORS_ORIGIN_USER || 'Not configured'}`);
+        console.log(`🔗 CORS Admin Frontend: ${process.env.CORS_ORIGIN_ADMIN || 'Not configured'}`);
         console.log(`📊 Database: Supabase connected`);
-        console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
-        console.log(`📝 Test endpoint: http://localhost:${PORT}/api/test`);
+        console.log(`✅ Health check: http://localhost:${PORT}/api/health`);
     });
 }
 

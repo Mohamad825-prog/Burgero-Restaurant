@@ -65,10 +65,15 @@ web_modules/
 # Yarn Integrity file
 .yarn-integrity
 
+# ========== ENVIRONMENT VARIABLES ==========
 # dotenv environment variable files
 .env
 .env.*
 !.env.example
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -137,3 +142,19 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# ========== BURGERO-SPECIFIC ADDITIONS ==========
+# Build outputs
+build/
+dist/
+
+# Uploads (backend)
+public/uploads/
+uploads/
+
+# Frontend build outputs
+burgero/build/
+admin-frontend/build/
+
+# Backend build outputs
+burgero-backend/build/
