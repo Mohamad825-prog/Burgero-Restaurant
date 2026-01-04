@@ -232,6 +232,217 @@ app.get('/api/menu/special', async (req, res) => {
     }
 });
 
+// ========== MENU MANAGEMENT ROUTES ==========
+
+// POST /api/menu/items - Add new menu item
+app.post('/api/menu/items', authenticateAdmin, async (req, res) => {
+    try {
+        const { name, price, description } = req.body;
+
+        if (!name || !price) {
+            return res.status(400).json({
+                success: false,
+                message: 'Name and price are required'
+            });
+        }
+
+        // For now, we'll store in Supabase without image upload
+        const { data, error } = await supabase
+            .from('menu_items')
+            .insert([{
+                name: name.trim(),
+                price: parseFloat(price),
+                description: description?.trim() || '',
+                image_url: '/images/placeholder.jpg', // Default image
+                is_default: false
+            }])
+            .select();
+
+        if (error) throw error;
+
+        res.json({
+            success: true,
+            message: 'Menu item added successfully',
+            data: data[0]
+        });
+    } catch (error) {
+        console.error('Error adding menu item:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to add menu item'
+        });
+    }
+});
+
+// POST /api/menu/special - Add new special item
+app.post('/api/menu/special', authenticateAdmin, async (req, res) => {
+    try {
+        const { title, price, stars } = req.body;
+
+        if (!title || !price) {
+            return res.status(400).json({
+                success: false,
+                message: 'Title and price are required'
+            });
+        }
+
+        const { data, error } = await supabase
+            .from('special_items')
+            .insert([{
+                title: title.trim(),
+                price: parseFloat(price),
+                stars: stars ? parseFloat(stars) : 4.5,
+                image_url: '/images/placeholder.jpg', // Default image
+                is_default: false
+            }])
+            .select();
+
+        if (error) throw error;
+
+        res.json({
+            success: true,
+            message: 'Special item added successfully',
+            data: data[0]
+        });
+    } catch (error) {
+        console.error('Error adding special item:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to add special item'
+        });
+    }
+});
+
+// PUT /api/menu/items/:id - Update menu item
+app.put('/api/menu/items/:id', authenticateAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, price, description } = req.body;
+
+        const { data, error } = await supabase
+            .from('menu_items')
+            .update({
+                name: name?.trim(),
+                price: price ? parseFloat(price) : undefined,
+                description: description?.trim()
+            })
+            .eq('id', id)
+            .select();
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Menu item not found'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Menu item updated successfully',
+            data: data[0]
+        });
+    } catch (error) {
+        console.error('Error updating menu item:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to update menu item'
+        });
+    }
+});
+
+// DELETE /api/menu/items/:id - Delete menu item
+app.delete('/api/menu/items/:id', authenticateAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const { error } = await supabase
+            .from('menu_items')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+
+        res.json({
+            success: true,
+            message: 'Menu item deleted successfully'
+        });
+    } catch (error) {
+        console.error('Error deleting menu item:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to delete menu item'
+        });
+    }
+});
+
+// ========== SPECIAL ITEMS MANAGEMENT ROUTES ==========
+
+// PUT /api/menu/special/:id - Update special item
+app.put('/api/menu/special/:id', authenticateAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, price, stars } = req.body;
+
+        const { data, error } = await supabase
+            .from('special_items')
+            .update({
+                title: title?.trim(),
+                price: price ? parseFloat(price) : undefined,
+                stars: stars ? parseFloat(stars) : undefined
+            })
+            .eq('id', id)
+            .select();
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Special item not found'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Special item updated successfully',
+            data: data[0]
+        });
+    } catch (error) {
+        console.error('Error updating special item:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to update special item'
+        });
+    }
+});
+
+// DELETE /api/menu/special/:id - Delete special item
+app.delete('/api/menu/special/:id', authenticateAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const { error } = await supabase
+            .from('special_items')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+
+        res.json({
+            success: true,
+            message: 'Special item deleted successfully'
+        });
+    } catch (error) {
+        console.error('Error deleting special item:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to delete special item'
+        });
+    }
+});
+
 // ========== ORDER ENDPOINTS ==========
 app.post('/api/orders', async (req, res) => {
     try {
