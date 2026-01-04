@@ -1,6 +1,28 @@
 import React from 'react';
 
 const MenuCard = ({ id, name, price, description, image, isDefault = true }) => {
+    // Create LOCAL SVG fallback (no external dependencies)
+    const getFallbackSvg = (name) => {
+        const svg = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+                <rect width="400" height="300" fill="#f3f4f6"/>
+                <rect x="100" y="100" width="200" height="100" fill="#d1d5db" rx="10"/>
+                <text x="50%" y="50%" font-family="Arial" font-size="20" fill="#6b7280" text-anchor="middle" dy=".3em">
+                    ${name || 'Burger'}
+                </text>
+            </svg>
+        `;
+        return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+    };
+
+    // Handle image error
+    const handleImageError = (e) => {
+        console.log('Image loading failed for:', image);
+        // Use LOCAL SVG fallback instead of external placeholder.com
+        e.target.src = getFallbackSvg(name);
+        e.target.onerror = null; // Prevent infinite loop
+    };
+
     return (
         <div
             className="group relative bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl"
@@ -19,11 +41,7 @@ const MenuCard = ({ id, name, price, description, image, isDefault = true }) => 
                 className="w-full h-64 object-cover rounded-t-xl transition-transform duration-500 ease-in-out group-hover:scale-110"
                 src={image}
                 alt={name}
-                onError={(e) => {
-                    console.log('Image failed to load:', image);
-                    e.target.src = `https://via.placeholder.com/400x300?text=${encodeURIComponent(name)}`;
-                    e.target.onerror = null;
-                }}
+                onError={handleImageError}
                 loading="lazy"
             />
             <div className="p-5 space-y-3">

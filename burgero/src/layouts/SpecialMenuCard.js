@@ -21,6 +21,27 @@ const SpecialMenuCard = ({ img, title, price, stars = 4.5 }) => {
         );
     };
 
+    // Create LOCAL SVG fallback
+    const getFallbackSvg = (title) => {
+        const svg = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+                <rect width="400" height="300" fill="#fef3c7"/>
+                <circle cx="200" cy="150" r="80" fill="#f59e0b" opacity="0.8"/>
+                <text x="50%" y="50%" font-family="Arial" font-size="24" fill="#92400e" text-anchor="middle" dy=".3em">
+                    ${title || 'Special'}
+                </text>
+            </svg>
+        `;
+        return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+    };
+
+    // Handle image error
+    const handleImageError = (e) => {
+        console.log('Special menu image failed:', img);
+        e.target.src = getFallbackSvg(title);
+        e.target.onerror = null;
+    };
+
     return (
         <div className="w-full bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden">
             {/* Image */}
@@ -28,9 +49,8 @@ const SpecialMenuCard = ({ img, title, price, stars = 4.5 }) => {
                 className="w-full h-52 object-cover"
                 src={img}
                 alt={title}
-                onError={(e) => {
-                    e.target.src = `https://via.placeholder.com/400x300?text=${title}`;
-                }}
+                onError={handleImageError}
+                loading="lazy"
             />
 
             {/* Content */}
@@ -48,7 +68,7 @@ const SpecialMenuCard = ({ img, title, price, stars = 4.5 }) => {
                     </span>
                 </div>
 
-                {/* Price + Button */}
+                {/* Price */}
                 <div className="flex items-center justify-center gap-4">
                     <h3 className="font-bold text-2xl text-secondary">{price}</h3>
                 </div>
