@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const multer = require('multer');
 const { supabase, testConnection } = require('./config/supabase');
 require('dotenv').config();
 
@@ -45,6 +46,14 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// ========== MULTER CONFIGURATION ==========
+// Configure multer for memory storage (Render doesn't have persistent storage)
+const storage = multer.memoryStorage();
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
 
 // Create uploads directory
 const uploadsDir = path.join(__dirname, 'public/uploads');
@@ -257,8 +266,11 @@ app.get('/api/menu/special', async (req, res) => {
 
 // ========== MENU MANAGEMENT ROUTES ==========
 
-// POST /api/menu/items - Add new menu item
-app.post('/api/menu/items', authenticateAdmin, async (req, res) => {
+// POST /api/menu/items - Add new menu item WITH FILE UPLOAD
+app.post('/api/menu/items', upload.single('image'), authenticateAdmin, async (req, res) => {
+    console.log('POST /api/menu/items - File received:', req.file ? 'Yes' : 'No');
+    console.log('Body fields:', req.body);
+
     try {
         const { name, price, description } = req.body;
 
@@ -269,19 +281,35 @@ app.post('/api/menu/items', authenticateAdmin, async (req, res) => {
             });
         }
 
-        // For now, we'll store in Supabase without image upload
+        // For now, store a placeholder image URL
+        // In production, you'd upload to cloud storage (Supabase Storage, AWS S3, etc.)
+        let imageUrl = '/images/placeholder.jpg';
+
+        if (req.file) {
+            console.log('File details:', {
+                originalname: req.file.originalname,
+                mimetype: req.file.mimetype,
+                size: req.file.size
+            });
+            // Store base64 or upload to Supabase Storage later
+            imageUrl = '/images/uploaded/' + Date.now() + '-' + req.file.originalname;
+        }
+
         const { data, error } = await supabase
             .from('menu_items')
             .insert([{
                 name: name.trim(),
                 price: parseFloat(price),
                 description: description?.trim() || '',
-                image_url: '/images/placeholder.jpg', // Default image
+                image_url: imageUrl,
                 is_default: false
             }])
             .select();
 
-        if (error) throw error;
+        if (error) {
+            console.error('Supabase error:', error);
+            throw error;
+        }
 
         res.json({
             success: true,
@@ -292,13 +320,17 @@ app.post('/api/menu/items', authenticateAdmin, async (req, res) => {
         console.error('Error adding menu item:', error);
         res.status(500).json({
             success: false,
-            message: 'Failed to add menu item'
+            message: 'Failed to add menu item',
+            error: error.message
         });
     }
 });
 
-// POST /api/menu/special - Add new special item
-app.post('/api/menu/special', authenticateAdmin, async (req, res) => {
+// POST /api/menu/special - Add new special item WITH FILE UPLOAD
+app.post('/api/menu/special', upload.single('image'), authenticateAdmin, async (req, res) => {
+    console.log('POST /api/menu/special - File received:', req.file ? 'Yes' : 'No');
+    console.log('Body fields:', req.body);
+
     try {
         const { title, price, stars } = req.body;
 
@@ -309,18 +341,28 @@ app.post('/api/menu/special', authenticateAdmin, async (req, res) => {
             });
         }
 
+        let imageUrl = '/images/placeholder.jpg';
+
+        if (req.file) {
+            console.log('File for special item:', req.file.originalname);
+            imageUrl = '/images/uploaded/special-' + Date.now() + '-' + req.file.originalname;
+        }
+
         const { data, error } = await supabase
             .from('special_items')
             .insert([{
                 title: title.trim(),
                 price: parseFloat(price),
                 stars: stars ? parseFloat(stars) : 4.5,
-                image_url: '/images/placeholder.jpg', // Default image
+                image_url: imageUrl,
                 is_default: false
             }])
             .select();
 
-        if (error) throw error;
+        if (error) {
+            console.error('Supabase error:', error);
+            throw error;
+        }
 
         res.json({
             success: true,
@@ -331,7 +373,8 @@ app.post('/api/menu/special', authenticateAdmin, async (req, res) => {
         console.error('Error adding special item:', error);
         res.status(500).json({
             success: false,
-            message: 'Failed to add special item'
+            message: 'Failed to add special item',
+            error: error.message
         });
     }
 });
