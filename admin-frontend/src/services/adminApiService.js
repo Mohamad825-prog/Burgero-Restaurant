@@ -99,11 +99,19 @@ class AdminApiService {
     // ========== MENU ITEMS ==========
     async addMenuItem(formData) {
         try {
-            const headers = this.getHeaders(true);
+            // Convert FormData to JSON
+            const itemData = {
+                name: formData.get('name'),
+                price: formData.get('price'),
+                description: formData.get('description') || ''
+            };
+
+            console.log('Sending menu item:', itemData);
+
             const response = await fetch(`${API_BASE_URL}/menu/items`, {
                 method: 'POST',
-                headers: headers,
-                body: formData
+                headers: this.getHeaders(),
+                body: JSON.stringify(itemData)
             });
 
             if (!response.ok) {
@@ -111,8 +119,7 @@ class AdminApiService {
                 throw new Error(errorData.message || 'Failed to add menu item');
             }
 
-            const data = await response.json();
-            return data;
+            return await response.json();
         } catch (error) {
             console.error('Error adding menu item:', error);
             throw error;
@@ -143,25 +150,11 @@ class AdminApiService {
         try {
             console.log(`Updating menu item ${id} with data:`, updateData);
 
-            const formData = new FormData();
-
-            // Add update data
-            Object.keys(updateData).forEach(key => {
-                if (updateData[key] !== undefined && updateData[key] !== null) {
-                    formData.append(key, updateData[key]);
-                }
-            });
-
-            // Add image file if provided
-            if (imageFile) {
-                formData.append('image', imageFile);
-            }
-
-            const headers = this.getHeaders(true);
+            // For now, send as JSON without image
             const response = await fetch(`${API_BASE_URL}/menu/items/${id}`, {
                 method: 'PUT',
-                headers: headers,
-                body: formData
+                headers: this.getHeaders(),
+                body: JSON.stringify(updateData)
             });
 
             // First, check if response is OK
@@ -218,11 +211,19 @@ class AdminApiService {
     // ========== SPECIAL ITEMS ==========
     async addSpecialItem(formData) {
         try {
-            const headers = this.getHeaders(true);
+            // Convert FormData to JSON
+            const itemData = {
+                title: formData.get('title'),
+                price: formData.get('price'),
+                stars: formData.get('stars') || 4.5
+            };
+
+            console.log('Sending special item:', itemData);
+
             const response = await fetch(`${API_BASE_URL}/menu/special`, {
                 method: 'POST',
-                headers: headers,
-                body: formData
+                headers: this.getHeaders(),
+                body: JSON.stringify(itemData)
             });
 
             if (!response.ok) {
@@ -230,8 +231,7 @@ class AdminApiService {
                 throw new Error(errorData.message || 'Failed to add special item');
             }
 
-            const data = await response.json();
-            return data;
+            return await response.json();
         } catch (error) {
             console.error('Error adding special item:', error);
             throw error;
@@ -262,25 +262,11 @@ class AdminApiService {
         try {
             console.log(`Updating special item ${id} with data:`, updateData);
 
-            const formData = new FormData();
-
-            // Add update data
-            Object.keys(updateData).forEach(key => {
-                if (updateData[key] !== undefined && updateData[key] !== null) {
-                    formData.append(key, updateData[key]);
-                }
-            });
-
-            // Add image file if provided
-            if (imageFile) {
-                formData.append('image', imageFile);
-            }
-
-            const headers = this.getHeaders(true);
+            // For now, send as JSON without image
             const response = await fetch(`${API_BASE_URL}/menu/special/${id}`, {
                 method: 'PUT',
-                headers: headers,
-                body: formData
+                headers: this.getHeaders(),
+                body: JSON.stringify(updateData)
             });
 
             // First, check if response is OK
