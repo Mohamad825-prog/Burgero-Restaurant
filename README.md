@@ -1,4 +1,4 @@
-# Burgero-Restaurant
+# Burgero-Restaurant 
 
 Burgero-Restaurant is a full-stack restaurant management and ordering platform. It includes a customer-facing frontend, an admin dashboard, and a backend API for menu, orders, and messaging.
 
