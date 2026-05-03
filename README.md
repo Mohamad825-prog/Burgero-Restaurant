@@ -1,67 +1,80 @@
-# Burgero-Restaurant 
+# Burgero Restaurant
 
-Burgero-Restaurant is a full-stack restaurant management and ordering platform. It includes a customer-facing frontend, an admin dashboard, and a backend API for menu, orders, and messaging.
+Burgero is a full-stack restaurant ordering and admin management project split into three apps:
 
-## Project Structure
+- `burgero/` - customer-facing React frontend
+- `admin-frontend/` - React admin dashboard
+- `burgero-backend/` - Node.js API backend
 
-- **admin-frontend/**: Admin dashboard for managing menu, orders, specials, and customer messages.
-- **burgero/**: Customer-facing frontend for browsing menu, placing orders, and viewing testimonials.
-- **burgero-backend/**: Node.js backend API for authentication, menu management, orders, and messaging.
+## Repository Structure
 
-## Features
+```text
+.
+├── admin-frontend/    # Admin dashboard
+├── burgero/           # Customer website
+├── burgero-backend/   # Backend API
+├── LICENSE
+├── README.md
+└── REMEDIATION_SUMMARY.md
+```
 
-- Customer menu browsing and ordering
-- Admin menu and order management
-- Special menu items
-- Customer testimonials and contact messages
-- Image uploads for menu items
-- Authentication for admin access
+## Prerequisites
 
-## Setup Instructions
+- Node.js 18+ for the backend
+- Node.js 24.x and npm 10.x are declared in both frontend apps
 
-### Prerequisites
-- Node.js (v14+ recommended)
-- npm or yarn
+## Environment Setup
 
-### Backend Setup
-1. Navigate to `burgero-backend/`
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Configure database in `config/database.js` and `config/supabase.js`
-4. Start the server:
-   ```bash
-   npm start
-   ```
+Copy each example file before running locally:
 
-### Admin Frontend Setup
-1. Navigate to `admin-frontend/`
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the development server:
-   ```bash
-   npm start
-   ```
+- `burgero/.env.example`
+- `admin-frontend/.env.example`
+- `burgero-backend/.env.example`
 
-### Customer Frontend Setup
-1. Navigate to `burgero/`
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the development server:
-   ```bash
-   npm start
-   ```
+The frontend apps expect `REACT_APP_API_URL` to point to the backend API, for example:
 
-## Deployment
-See `DEPLOYMENT.md` in each folder for deployment instructions.
+```bash
+REACT_APP_API_URL=http://localhost:5000/api
+```
+
+## Local Development
+
+### 1. Backend
+
+```bash
+cd burgero-backend
+npm install
+npm start
+```
+
+### 2. Customer Frontend
+
+```bash
+cd burgero
+npm install
+npm start
+```
+
+### 3. Admin Frontend
+
+```bash
+cd admin-frontend
+npm install
+npm start
+```
+
+## Deployment Notes
+
+- `burgero/` and `admin-frontend/` include `vercel.json`
+- `burgero-backend/` includes `render.yaml`
+- Generated frontend `build/` output is intentionally not kept in source control
+- Backend upload artifacts under `public/uploads/` should also remain untracked
+
+## Notes
+
+- Root-level cleanup in this repository is intentionally conservative and does not change application behavior
+- Some backend files appear to belong to an older MySQL-based codepath and were left in place for manual review
 
 ## License
-See [LICENSE](LICENSE) for license information.
 
-## Contact
-For support or inquiries, please contact the project owner or open an issue in the repository.
+This project is licensed under the MIT License. See [LICENSE](LICENSE).
